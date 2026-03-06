@@ -1,11 +1,15 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", 
+    methods: ["GET", "POST", "PUT", "DELETE"],
+}));
+
 app.use(express.json());
-app.use('/images', express.static('src/utils/images'));
 app.use('/api/products', require('./routes/productRoutes'));
 
 app.get("/", (req, res) => {

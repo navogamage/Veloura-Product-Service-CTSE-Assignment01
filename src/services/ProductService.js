@@ -2,6 +2,8 @@ const productRepository = require('../repositories/ProductRepository');
 
 class ProductService {
   async createProduct(data) {
+    // multer-storage-cloudinary already uploaded the file
+    // req.file.path contains the Cloudinary URL
     return await productRepository.create(data);
   }
 

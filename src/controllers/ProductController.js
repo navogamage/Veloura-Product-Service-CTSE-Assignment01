@@ -2,7 +2,11 @@ const productService = require('../services/ProductService');
 
 const createProduct = async (req, res, next) => {
   try {
-    const product = await productService.createProduct(req.body);
+    const productData = { ...req.body };
+    if (req.file) {
+      productData.imageUrl = req.file.path;
+    }
+    const product = await productService.createProduct(productData);
     res.status(201).json(product);
   } catch (error) {
     next(error);
@@ -30,20 +34,23 @@ const getProductById = async (req, res, next) => {
 
 const updateProduct = async (req, res, next) => {
   try {
-    const updated = await productService.updateProduct(
-      req.params.id,
-      req.body
-    );
-
-    if (!updated) {
-      return res.status(404).json({ message: "Product not found" });
+    const productData = { ...req.body };
+    if (req.file) {
+      productData.imageUrl = req.file.path;
     }
 
-    res.status(200).json({
-      message: "Product updated successfully",
-      product: updated,
-    });
+    // Parse size if sent as JSON string from form-data
+    if (typeof productData.size === 'string') {
+      try {
+        productData.size = JSON.parse(productData.size);
+      } catch {
+        productData.size = productData.size.split(',').map(s => s.trim());
+      }
+    }
 
+    const updated = await productService.updateProduct(req.params.id, productData);
+    if (!updated) return res.status(404).json({ message: 'Product not found' });
+    res.status(200).json({ message: 'Product updated successfully', product: updated });
   } catch (error) {
     next(error);
   }
