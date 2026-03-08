@@ -9,6 +9,7 @@ const createProduct = async (req, res, next) => {
     const product = await productService.createProduct(productData);
     res.status(201).json(product);
   } catch (error) {
+    console.error('Create Product Error:', error);
     next(error);
   }
 };
