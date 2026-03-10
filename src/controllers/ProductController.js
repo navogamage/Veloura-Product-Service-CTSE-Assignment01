@@ -67,10 +67,27 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+const deductStock = async (req, res, next) => {
+  try {
+    const qty = parseInt(req.body.quantity, 10);
+    if (!qty || qty < 1) {
+      return res.status(400).json({ message: 'Invalid quantity' });
+    }
+    const updated = await productService.deductStock(req.params.id, qty);
+    if (!updated) {
+      return res.status(400).json({ message: 'Insufficient stock or product not found' });
+    }
+    res.status(200).json({ message: 'Stock updated', stockQuantity: updated.stockQuantity });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  deductStock,
 };

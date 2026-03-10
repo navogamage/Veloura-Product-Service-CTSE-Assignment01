@@ -20,6 +20,15 @@ class ProductRepository {
   async delete(id) {
     return await Product.findByIdAndDelete(id);
   }
+
+  async deductStock(id, qty) {
+    // Atomically deduct qty only if enough stock exists
+    return await Product.findOneAndUpdate(
+      { _id: id, stockQuantity: { $gte: qty } },
+      { $inc: { stockQuantity: -qty } },
+      { new: true }
+    );
+  }
 }
 
 module.exports = new ProductRepository();

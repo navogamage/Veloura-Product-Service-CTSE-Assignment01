@@ -9,5 +9,6 @@ router.get('/', productController.getAllProducts);
 router.get('/:id', productController.getProductById);
 router.put('/:id', upload.single('image'), validateProduct, productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
+router.patch('/:id/stock', productController.deductStock);
 
 module.exports = router;
