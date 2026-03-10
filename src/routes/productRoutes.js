@@ -10,5 +10,6 @@ router.get('/:id', productController.getProductById);
 router.put('/:id', upload.single('image'), validateProduct, productController.updateProduct);
 router.delete('/:id', productController.deleteProduct);
 router.patch('/:id/stock', productController.deductStock);
+router.patch('/:id/stock/restore', productController.restoreStock);
 
 module.exports = router;

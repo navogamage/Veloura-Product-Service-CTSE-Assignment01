@@ -26,6 +26,10 @@ class ProductService {
   async deductStock(id, qty) {
     return await productRepository.deductStock(id, qty);
   }
+
+  async restoreStock(id, qty) {
+    return await productRepository.restoreStock(id, qty);
+  }
 }
 
 module.exports = new ProductService();

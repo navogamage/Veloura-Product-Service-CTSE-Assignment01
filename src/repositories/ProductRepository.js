@@ -29,6 +29,15 @@ class ProductRepository {
       { new: true }
     );
   }
+
+  async restoreStock(id, qty) {
+    // Atomically restore qty back to stock
+    return await Product.findByIdAndUpdate(
+      id,
+      { $inc: { stockQuantity: qty } },
+      { new: true }
+    );
+  }
 }
 
 module.exports = new ProductRepository();
