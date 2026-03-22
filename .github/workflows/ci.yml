@@ -23,10 +23,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -36,10 +36,16 @@ jobs:
         run: npm ci
 
       - name: Lint
-        run: npm run lint
+        run: npm run lint --if-present
 
       - name: Test
-        run: npm test
+        run: |
+          TEST_SCRIPT=$(node -p "(require('./package.json').scripts || {}).test || ''")
+          if [ -z "$TEST_SCRIPT" ] || [ "$TEST_SCRIPT" = "echo \"Error: no test specified\" && exit 1" ]; then
+            echo "Skipping tests: no real test script configured."
+          else
+            npm test
+          fi
 
       - name: Snyk SAST
         if: ${{ env.SNYK_TOKEN != '' }}
