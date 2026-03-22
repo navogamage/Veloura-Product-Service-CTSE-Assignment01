@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: Veloura Product Service API
+  version: 1.0.0
+  description: Product catalog and inventory management API for the online clothing platform.
+servers:
+  - url: http://localhost:5002
+tags:
+  - name: Health
+  - name: Products
+  - name: Stock
+paths:
+  /:
+    get:
+      tags: [Health]
+      summary: Service health check
+      responses:
+        "200":
+          description: Service is running
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Product Service Running
+
+  /api/products:
+    post:
+      tags: [Products]
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ProductCreateRequest"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+    get:
+      tags: [Products]
+      summary: List all products
+      responses:
+        "200":
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /api/products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product by ID
+      parameters:
+        - $ref: "#/components/parameters/ProductIdParam"
+      responses:
+        "200":
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Products]
+      summary: Update product by ID
+      parameters:
+        - $ref: "#/components/parameters/ProductIdParam"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ProductUpdateRequest"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProductResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [Products]
+      summary: Delete product by ID
+      parameters:
+        - $ref: "#/components/parameters/ProductIdParam"
+      responses:
+        "200":
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/products/{id}/stock:
+    patch:
+      tags: [Stock]
+      summary: Deduct product stock
+      parameters:
+        - $ref: "#/components/parameters/ProductIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockChangeRequest"
+      responses:
+        "200":
+          description: Stock updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/products/{id}/stock/restore:
+    patch:
+      tags: [Stock]
+      summary: Restore product stock
+      parameters:
+        - $ref: "#/components/parameters/ProductIdParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockChangeRequest"
+      responses:
+        "200":
+          description: Stock restored
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    ProductIdParam:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: MongoDB ObjectId of the product
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            missingFields:
+              value:
+                message: Missing required fields
+            invalidPrice:
+              value:
+                message: Invalid price
+            invalidStock:
+              value:
+                message: Invalid stock quantity
+            invalidQuantity:
+              value:
+                message: Invalid quantity
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            productNotFound:
+              value:
+                message: Product not found
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 67de88f0b4e62f2c53e5a7b8
+        productName:
+          type: string
+          example: Slim Fit Cotton T-Shirt
+        description:
+          type: string
+          example: Breathable cotton t-shirt for everyday wear.
+        price:
+          type: number
+          format: float
+          example: 29.99
+        category:
+          type: string
+          example: Tops
+        brand:
+          type: string
+          example: Veloura
+        stockQuantity:
+          type: integer
+          example: 120
+        size:
+          type: array
+          items:
+            type: string
+          example: ["S", "M", "L", "XL"]
+        imageUrl:
+          type: string
+          format: uri
+          nullable: true
+          example: https://res.cloudinary.com/demo/image/upload/v1/products/shirt.jpg
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductCreateRequest:
+      type: object
+      required: [productName, description, price, category, brand, stockQuantity, size]
+      properties:
+        productName:
+          type: string
+          example: Slim Fit Cotton T-Shirt
+        description:
+          type: string
+          example: Breathable cotton t-shirt for everyday wear.
+        price:
+          type: number
+          minimum: 0
+          example: 29.99
+        category:
+          type: string
+          example: Tops
+        brand:
+          type: string
+          example: Veloura
+        stockQuantity:
+          type: integer
+          minimum: 0
+          example: 120
+        size:
+          oneOf:
+            - type: array
+              items:
+                type: string
+            - type: string
+          description: Array of sizes, or a JSON/comma-separated string from form-data.
+          example: ["S", "M", "L", "XL"]
+        image:
+          type: string
+          format: binary
+          description: Optional product image file
+
+    ProductUpdateRequest:
+      allOf:
+        - $ref: "#/components/schemas/ProductCreateRequest"
+
+    UpdateProductResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Product updated successfully
+        product:
+          $ref: "#/components/schemas/Product"
+
+    StockChangeRequest:
+      type: object
+      required: [quantity]
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+
+    StockResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Stock updated
+        stockQuantity:
+          type: integer
+          example: 118
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Product deleted
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Product not found
