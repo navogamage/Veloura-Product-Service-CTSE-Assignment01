@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: Product catalog and inventory management API for the online clothing platform.
 servers:
-  - url: http://localhost:5002
+  - url: https://veloura-product-service-ctse-assignment01-production.up.railway.app
 tags:
   - name: Health
   - name: Products
